@@ -1,0 +1,132 @@
+
+environ
+  vocabularies PRED;
+begin
+
+reserve a, b for object;
+reserve X, Y for set;
+
+definition
+  let x be object;
+  pred P x means x in X;
+end;
+
+definition
+  let x, y be object;
+  pred x R y means x in X & y in Y;
+end;
+
+
+
+
+:: ------eq------
+theorem
+  a = a
+proof
+  thus thesis;
+end;
+
+theorem
+  a = b & P a implies P b
+proof
+  assume Eqab: a = b;
+  assume Pa: P a;
+  thus P b by Eqab, Pa;
+end;
+
+
+:: ------forall------
+theorem
+  for x be object holds x = x
+proof
+  let x be object;
+  thus x = x;
+end;
+
+theorem
+  (for x be object holds P x) implies P a
+proof
+  assume A1: for x be object holds P x;
+  thus P a by A1;
+end;
+
+:: ------exists------
+theorem
+  P a implies ex x be object st P x
+proof
+  assume A1: P a;
+  take a;
+  thus thesis by A1;
+end;
+
+theorem
+  (ex x be object st P x) implies (ex y be object st P y)
+proof
+  assume A1: ex x be object st P x;
+  consider x be object such that A2: P x by A1;
+  take x;
+  thus thesis by A2;
+end;
+
+
+
+
+
+
+
+:: ------extra------
+theorem
+  (ex y be object st for x be object holds x R y)
+  implies
+  for x be object holds ex y be object st x R y
+proof
+  assume ex y be object st for x be object holds x R y;
+  then consider y be object such that A1: for x be object holds x R y;
+  let x be object;
+  take y;
+  thus x R y by A1;
+end;
+
+
+theorem DeMorganNEF:
+  (not ex x be object st P x) implies
+  (for x be object holds not P x)
+proof
+  assume A1: not ex x be object st P x;
+  let x be object;
+  assume P x;
+  then ex x be object st P x;
+  hence contradiction by A1;
+end;
+
+theorem DeMorganFNE:
+  (for x be object holds not P x) implies
+  (not ex x be object st P x)
+proof
+  assume A1: for x be object holds not P x;
+  assume ex x be object st P x;
+  then consider x be object such that A2: P x;
+  not P x by A1;
+  hence contradiction by A2;
+end;
+
+theorem DeMorganENF:
+  (ex x be object st not P x) implies
+  (not for x be object holds P x)
+proof
+  assume ex x be object st not P x;
+  then consider x be object such that A1: not P x;
+  assume for x be object holds P x;
+  then P x;
+  hence contradiction by A1;
+end;
+
+theorem DeMorganNFE:
+  (not for x be object holds P x) implies
+  (ex x be object st not P x)
+proof
+  assume A1: not for x be object holds P x;
+  assume not ex x be object st not P x;
+  then for x be object holds not not P x by DeMorganNEF;
+  hence contradiction by A1;
+end;

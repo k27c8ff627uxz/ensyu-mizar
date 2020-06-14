@@ -1,0 +1,235 @@
+environ
+  vocabularies PROP;
+begin
+
+reserve a, b, c for object;
+reserve X for set;
+
+definition
+  pred P means a in X;
+  pred Q means b in X;
+  pred R means c in X;
+end;
+
+
+:: ----- impl -----
+
+theorem
+  P implies (Q implies P)
+proof
+  assume A1: P;
+  assume Q;
+  thus P by A1;
+end;
+
+
+theorem
+  P implies P
+proof
+  assume A1: P;
+  thus P by A1;
+end;
+
+
+:: 'thesis' means a statement we are proving.
+theorem
+  P implies P
+proof
+  assume A1: P;
+  thus thesis by A1;
+end;
+
+:: 'assume P; then XXXXX' means 'assume A1: P; thus XXXXX by A1'
+:: 'hence = then + thus'
+theorem
+  P implies P
+proof
+  assume P;
+::then thus P  // Why an error occurs?
+  hence P;
+end;
+
+:: The following works autmated proof.
+theorem
+  P implies P
+proof
+  thus thesis;
+end;
+
+
+
+theorem
+  P implies ((P implies Q) implies Q)
+proof
+  assume A1: P;
+  assume A2: P implies Q;
+  thus Q by A1, A2;
+end;
+
+
+
+:: Make a lemma 'Q';
+theorem
+  P implies (
+    (P implies Q) implies (
+       (Q implies R) implies R
+    )
+  )
+proof
+  assume A1: P;
+  assume A2: P implies Q;
+  assume A3: Q implies R;
+  A4: Q
+  proof
+    thus Q by A1, A2;
+  end;
+  thus R by A3, A4;
+end;
+
+theorem
+  P implies (
+    (P implies Q) implies (
+       (Q implies R) implies R
+    )
+  )
+proof
+  assume A1: P;
+  assume A2: P implies Q;
+  assume A3: Q implies R;
+  A4: Q by A1, A2;
+  thus R by A3, A4;
+end;
+
+
+
+
+
+:: ------and------
+
+theorem
+  (P & Q) implies (P & Q)
+proof
+  assume A1: P & Q;
+  thus thesis by A1;
+end;
+
+theorem
+  (P & Q) implies (P & Q)
+proof
+  assume A1: P;
+  assume A2: Q;
+  thus P by A1;
+  thus Q by A2;
+end;
+
+theorem
+  (P & Q) implies (P & Q)
+proof
+  assume A1: P;
+  assume A2: Q;
+  thus P & Q by A1, A2;
+end;
+
+theorem
+  (P & Q) implies P
+proof
+  assume A1: P & Q;
+  hence P;
+end;
+
+theorem
+  (P & Q) implies (R implies P & (Q & R))
+proof
+  assume A1: P & Q;
+  assume A2: R;
+  thus P & Q by A1;
+::thus thesis by A1 ... error
+  thus R by A2;
+end;
+
+:: ------or------
+theorem
+  (P or Q) implies (P or Q)
+proof
+  assume A1: P or Q;
+  thus thesis by A1;
+end;
+
+theorem P implies (P or Q)
+proof
+  assume A1: P;
+  thus P or Q by A1;
+end;
+
+theorem
+  (P or Q) implies (P or Q)
+proof
+  assume P or Q;
+  then per cases;
+  suppose C1: P;
+    thus P or Q by C1;
+  end;
+  suppose C2: Q;
+    thus P or Q by C2;
+  end;
+end;
+
+
+
+
+:: ------contradiction-------
+
+:: Conflict implies everything
+theorem
+  contradiction implies P
+proof
+  assume A1: contradiction;
+  assume not P;
+  thus contradiction by A1;
+end;
+
+theorem
+  contradiction implies P
+proof
+  assume contradiction;
+  hence P;
+end;
+
+
+theorem
+  P & not P implies contradiction
+proof
+  assume A1: P;
+  assume A2: not P;
+  thus contradiction by A1, A2;
+end;
+
+theorem
+  (not (not P)) implies P
+proof
+  assume A1: not (not P);
+  assume A2: not P;
+  thus contradiction by A1, A2;
+end;
+
+theorem
+  P implies not (not P)
+proof
+  assume A1: P;
+  assume A2: not P;
+  thus contradiction by A1, A2;
+end;
+
+theorem
+  (P implies Q) implies (not P or Q)
+proof
+  assume A1: P implies Q;
+  per cases;
+  suppose A2: P;
+    Q by A1, A2;
+    hence thesis;
+  end;
+  suppose not P;
+    hence thesis;
+  end;
+end;
