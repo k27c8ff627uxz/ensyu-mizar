@@ -1,0 +1,88 @@
+environ
+  vocabularies SET;
+  theorems TARSKI_0, TARSKI;  
+begin
+
+
+definition
+  let x, y be set;
+  func { x, y } -> set means
+    for a be object holds (a in it iff a = x or a = y);
+  existence
+  proof
+    consider z be set such that
+      PairExs: for a be object holds (a in z iff (a = x or a = y))
+      by TARSKI_0:3;
+    take z;
+    thus thesis by PairExs;
+  end;
+  uniqueness
+  proof
+    let X1, X2 be set such that
+    A1: for a be object holds (a in X1 iff a = x or a = y) and
+    A2: for a be object holds (a in X2 iff a = x or a = y);
+    for a be object holds a in X1 iff a in X2
+    proof
+      let a be object;
+      C1: a in X1 implies a in X2
+      proof
+        assume a in X1;
+        then a = x or a = y by A1;
+        hence thesis by A2;
+      end;
+      C2: a in X2 implies a in X1
+      proof
+        assume a in X2;
+        then a = x or a = y by A2;
+        hence thesis by A1;
+      end;
+      hence thesis by C1, C2;
+    end;
+    hence thesis by TARSKI_0:2;
+  end;
+end;
+
+definition
+  let x be set;
+  func { x } -> set equals {x, x};
+  coherence;
+end;
+
+definition
+  let X be set;
+  func union X -> set means
+    for a be object holds a in it iff ex Y be set st a in Y & Y in X;
+  existence
+  proof
+    consider Z be set such that
+      UnionExs: for a be object holds
+        a in Z iff ex Y being set st a in Y & Y in X by TARSKI_0:4;
+    take Z;
+    thus thesis by UnionExs;
+  end;
+  uniqueness
+  proof
+    let Z1, Z2 be set such that
+    A1: for a be object holds a in Z1 iff ex Y be set st a in Y & Y in X and
+    A2: for a be object holds a in Z2 iff ex Y be set st a in Y & Y in X;
+    for a be object holds a in Z1 iff a in Z2
+    proof
+      let a be object;
+      C1: a in Z1 implies a in Z2
+      proof
+        assume a in Z1;
+        then ex Y be set st a in Y & Y in X by A1;
+        hence thesis by A2;
+      end;
+      C2: a in Z2 implies a in Z1
+      proof
+        assume a in Z2;
+        then ex Y be set st a in Y & Y in X by A2;
+        hence thesis by A1;
+      end;
+      hence thesis by C1, C2;
+    end;
+    hence thesis by TARSKI_0:2;
+  end;
+end;
+  

@@ -1,0 +1,30 @@
+environ
+  vocabularies SET;
+  notations SETDEF;
+  constructors SETDEF;
+  theorems SETDEF;
+begin
+
+theorem
+  for x be set holds x in {x}
+proof
+  let x be set;
+  {x} = {x, x} by SETDEF:def 2;
+  then A1: for a be object holds (a in {x} iff a = x or a = x)
+    by SETDEF:def 1;
+  x = x;
+  then x = x or x = x;
+  hence x in {x} by A1;
+end;
+
+theorem
+  for x, a be set holds a in {x} implies a = x
+proof
+  let x, a be set;
+  assume A1: a in {x};
+  {x} = {x, x} by SETDEF:def 2;
+  then for a be object holds (a in {x} iff a = x or a = x)
+    by SETDEF:def 1;
+  then a = x or a = x by A1;
+  hence a = x;
+end;
