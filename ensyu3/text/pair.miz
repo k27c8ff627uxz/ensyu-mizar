@@ -1,0 +1,143 @@
+environ
+  vocabularies TARSKI, XBOOLE_0, PAIR;
+  notations TARSKI, XBOOLE_0;
+  constructors TARSKI, XBOOLE_0;
+  theorems TARSKI, UTILS;
+begin
+
+  
+definition
+  let x be object;
+  attr x is pair means ex l, r be object st x = [l, r];
+end;
+
+registration
+  :: To allow 'pair object' mode
+  cluster pair for object;
+  existence
+  proof
+    take [{}, {}];
+    take {};
+    take {};
+    thus thesis;
+  end;
+end;
+
+definition
+  let x be pair object;
+  func left x -> object means :LEFTDEF:
+    ex r be object st x = [it, r];
+  existence
+  proof
+    x is pair;
+    then consider l, r be object such that Eqx: x = [l, r];
+    take l;
+    take r;
+    thus x = [l, r] by Eqx;
+  end;
+  uniqueness
+  proof
+    let l1, l2 be object such that
+    A1: ex r be object st x = [l1, r] and
+    A2: ex r be object st x = [l2, r];
+    consider r1 be object such that B1: x = [l1, r1] by A1;
+    consider r2 be object such that B2: x = [l2, r2] by A2;
+    [l1, r1] = [l2, r2]
+    proof
+      thus [l1, r1] = x by B1
+      .= [l2, r2] by B2;
+    end;
+    then l1 = l2 & r1 = r2 by UTILS:3;
+    hence l1 = l2;
+  end;
+  func right x -> object means :RIGHTDEF:
+    ex l be object st x = [l, it];
+  existence
+  proof
+    x is pair;
+    then consider l, r be object such that Eqx: x = [l, r];
+    take r;
+    take l;
+    thus x = [l, r] by Eqx;
+  end;
+  uniqueness
+  proof
+    let r1, r2 be object such that
+    A1: ex l be object st x = [l, r1] and
+    A2: ex l be object st x = [l, r2];
+    consider l1 be object such that B1: x = [l1, r1] by A1;
+    consider l2 be object such that B2: x = [l2, r2] by A2;
+    [l1, r1] = [l2, r2]
+    proof
+      thus [l1, r1] = x by B1
+      .= [l2, r2] by B2;
+    end;
+    then l1 = l2 & r1 = r2 by UTILS:3;
+    hence r1 = r2;
+  end;
+end;
+
+
+
+registration
+  let l, r be object;
+  :: To allow '[l, r] is pair'
+  ::    ... to allow such a formula 'left [l, r]'
+  cluster [l, r] -> pair;
+  coherence
+  proof
+    take l;
+    take r;
+    thus [l, r] = [l, r];
+  end;
+end;
+
+theorem
+  LeftSol: for l, r be object holds left [l, r] = l
+proof
+  let l, r be object;
+  consider rr be object such that A1: [l, r] = [left [l, r], rr] by LEFTDEF;
+  l = left [l, r] & r = rr by A1, UTILS:3;
+  hence l = left [l, r];
+end;
+
+theorem
+  RightSol: for l, r be object holds right [l, r] = r
+proof
+  let l, r be object;
+  consider ll be object such that A1: [l, r] = [ll, right [l, r]] by RIGHTDEF;
+  l = ll & r = right [l, r] by A1, UTILS:3;
+  hence r = right [l, r];
+end;
+
+theorem
+  DestructPair: for X be pair object holds X = [left X, right X]
+proof
+  let X be pair object;
+  X is pair;
+  then consider l, r be object such that EqX: X = [l, r];
+  thus X = [l, r] by EqX
+  .= [left [l, r], r] by LeftSol
+  .= [left [l, r], right [l, r]] by RightSol
+  .= [left X, right X] by EqX;
+end;
+
+definition
+  let X1, X2 be pair object;
+  redefine pred X1 = X2 means left X1 = left X2 & right X1 = right X2;
+  correctness
+  :: X1 = X2 iff (left X1 = left X2 & right X1 = right X2)
+  proof
+    thus X1 = X2 implies (left X1 = left X2 & right X1 = right X2);
+    thus (left X1 = left X2 & right X1 = right X2) implies X1 = X2
+    proof
+      assume EqL: left X1 = left X2;
+      assume EqR: right X1 = right X2;
+      thus X1 = [left X1, right X1] by DestructPair
+      .= [left X2, right X2] by EqL, EqR
+      .= X2 by DestructPair;
+    end;
+  end;
+end;
+
+
