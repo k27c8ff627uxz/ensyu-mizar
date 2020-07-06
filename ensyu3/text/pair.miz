@@ -2,7 +2,7 @@ environ
   vocabularies TARSKI, XBOOLE_0, PAIR;
   notations TARSKI, XBOOLE_0;
   constructors TARSKI, XBOOLE_0;
-  theorems TARSKI, UTILS;
+  theorems TARSKI, XTUPLE_0;
 begin
 
   
@@ -47,7 +47,7 @@ definition
       thus [l1, r1] = x by B1
       .= [l2, r2] by B2;
     end;
-    then l1 = l2 & r1 = r2 by UTILS:3;
+    then l1 = l2 & r1 = r2 by XTUPLE_0:1;
     hence l1 = l2;
   end;
   func right x -> object means :RIGHTDEF:
@@ -72,7 +72,7 @@ definition
       thus [l1, r1] = x by B1
       .= [l2, r2] by B2;
     end;
-    then l1 = l2 & r1 = r2 by UTILS:3;
+    then l1 = l2 & r1 = r2 by XTUPLE_0:1;
     hence r1 = r2;
   end;
 end;
@@ -97,7 +97,7 @@ theorem
 proof
   let l, r be object;
   consider rr be object such that A1: [l, r] = [left [l, r], rr] by LEFTDEF;
-  l = left [l, r] & r = rr by A1, UTILS:3;
+  l = left [l, r] & r = rr by A1, XTUPLE_0:1;
   hence l = left [l, r];
 end;
 
@@ -106,7 +106,7 @@ theorem
 proof
   let l, r be object;
   consider ll be object such that A1: [l, r] = [ll, right [l, r]] by RIGHTDEF;
-  l = ll & r = right [l, r] by A1, UTILS:3;
+  l = ll & r = right [l, r] by A1, XTUPLE_0:1;
   hence r = right [l, r];
 end;
 
