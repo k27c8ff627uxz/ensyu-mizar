@@ -7,9 +7,13 @@
 */text/*.dcx
 */text/*.dfr
 */text/*.ecl
+*/text/*.eid
 */text/*.eno
+*/text/*.epr
+*/text/*.erd
 */text/*.ere
 */text/*.err
+*/text/*.esh
 */text/*.eth
 */text/*.evl
 */text/*.fil
