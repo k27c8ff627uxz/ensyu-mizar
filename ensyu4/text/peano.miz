@@ -1,0 +1,211 @@
+environ
+  vocabularies TARSKI, XBOOLE_0, SUBSET_1, ORDINAL1, CARD_1, ENSYU4;
+  notations TARSKI, SUBSET_1, XBOOLE_0, RELAT_1, ORDINAL1;
+  constructors TARSKI, SUBSET_1, XBOOLE_0, RELAT_1, ORDINAL1;
+  theorems TARSKI, TARSKI_0, XBOOLE_0, XBOOLE_1, SUBSET_1, ORDINAL1;
+  schemes ORDINAL2;
+  registrations XBOOLE_0, ORDINAL1;
+begin
+
+definition
+  func myNAT -> set equals omega;
+  coherence;
+end;
+
+definition
+  mode myNat is Element of myNAT;
+end;
+
+definition
+  func N0 -> myNat equals {};
+  coherence
+  proof
+    {} in myNAT by ORDINAL1:def 11;
+    then {} is Element of myNAT by SUBSET_1:def 1;
+    hence {} is myNat;
+  end;
+end;
+
+registration
+  :: To allow 'Function of myNAT, A'
+  cluster myNAT -> non empty;
+  coherence;
+end;
+
+myNatIsOrdinal:
+  for n be myNat holds n is Ordinal
+proof
+  let n be myNat;
+  n in myNAT by SUBSET_1:def 1;
+  then n in omega;
+  hence n is Ordinal by ORDINAL1:13;
+end;
+
+:: Peano2
+definition
+  let n be myNat;
+  func NSucc n -> myNat means
+    :NSuccDef: ex nn be set st nn = n & it = succ nn;
+  existence
+  proof
+    n is Ordinal by myNatIsOrdinal;
+    then reconsider nn = n as Ordinal;
+    succ nn is myNat
+    proof
+      omega is limit_ordinal by ORDINAL1:def 11;
+      then A1:
+        for nn be Ordinal st nn in omega holds succ nn in omega by ORDINAL1:28;
+      nn in omega by SUBSET_1:def 1;
+      then succ nn in omega by A1;
+      hence succ nn is myNat by SUBSET_1:def 1;
+    end;
+    then reconsider snn = succ nn as myNat;
+    take snn;
+    take nn;
+    thus nn = n;
+    thus snn = succ nn;
+  end;
+  uniqueness
+  proof
+    let succn1, succn2 be myNat such that
+    A1: ex nn be set st nn = n & succn1 = succ nn and
+    A2: ex nn be set st nn = n & succn2 = succ nn;
+    consider nn1 be set such that
+      eqn1: nn1 = n and
+      eqsn1: succn1 = succ nn1 by A1;
+    consider nn2 be set such that
+      eqn2: nn2 = n and
+      eqsn2: succn2 = succ nn2 by A2;
+    eqn: nn1 = nn2 by eqn1, eqn2;
+    thus succn2 = succ nn2 by eqsn2
+    .= succ nn1 by eqn
+    .= succn1 by eqsn1;
+  end;
+end;
+
+Eqsucc:
+  for i be set holds for n be myNat holds
+    i = n implies succ i = NSucc n
+proof
+  let i be set;
+  let n be myNat;
+  assume Eqi: i = n;
+  ex nn be set st nn = n & NSucc n = succ nn by NSuccDef;
+  then consider nn be set such that
+  Eqnn: nn = n and
+  Eqsucc: NSucc n = succ nn;
+  i = nn by Eqi, Eqnn;
+  hence succ i = succ nn
+  .= NSucc n by Eqsucc;
+end;
+
+theorem
+  Peano3: for n be myNat holds not NSucc n = N0
+proof
+  let n be myNat;
+  n is set by TARSKI_0:1;
+  then reconsider i = n as set;
+  succ i = NSucc n by Eqsucc;
+  hence thesis;
+end;
+
+theorem
+  Peano4: for n1, n2 be myNat holds NSucc n1 = NSucc n2 implies n1 = n2
+proof
+  let n1, n2 be myNat;
+  reconsider i1 = n1 as set by TARSKI_0:1;
+  reconsider i2 = n2 as set by TARSKI_0:1;
+  assume EqNSucc: NSucc n1 = NSucc n2;
+  succ i1 = succ i2
+  proof
+    thus succ i1 = NSucc n1 by Eqsucc
+    .= NSucc n2 by EqNSucc
+    .= succ i2 by Eqsucc;
+  end;
+  then i1 = i2 by ORDINAL1:7;
+  hence n1 = n2;
+end;
+
+scheme
+  Peano5 { P[myNat] } : for n be myNat holds P[n]
+provided
+  A1: P[N0] and
+  A2: for n be myNat holds P[n] implies P[NSucc n]
+proof
+  let n be myNat;
+  n is Ordinal by myNatIsOrdinal;
+  then reconsider nn = n as Ordinal;
+  defpred PP[Ordinal] means for n be myNat st n = $1 holds P[n];
+  for A be Ordinal holds PP[A]
+  proof
+    Ind1: PP[0]
+    proof
+      N0 = 0 by ORDINAL1:def 13;
+      hence PP[0] by A1;
+    end;
+    Ind2: for A being Ordinal st PP[A] holds PP[succ A]
+    proof
+      let A be Ordinal;
+      assume PPA: PP[A];
+      let snn be myNat such that
+      Eqsnn: snn = succ A;
+      A is myNat
+      proof
+        myNAT is ordinal by ORDINAL1:def 11;
+        then myNAT is epsilon-transitive by ORDINAL1:def 4;
+        then ETNAT:
+          for x be set st x in myNAT holds x c= myNAT by ORDINAL1:def 2;
+        snn is myNat;
+        then snn in myNAT by SUBSET_1:def 1;
+        then succ A in myNAT by Eqsnn;
+        then succ A c= myNAT by ETNAT;
+        then for a be object st a in succ A holds a in myNAT by TARSKI:def 3;
+        then A in myNAT by ORDINAL1:6;
+        hence A is myNat by SUBSET_1:def 1;
+      end;
+      then reconsider nn = A as myNat;
+      Eqsnn2: snn = NSucc nn
+      proof
+        thus snn = succ A by Eqsnn
+        .= NSucc nn by Eqsucc;
+      end;
+      P[nn] by PPA;
+      then P[NSucc nn] by A2;
+      hence P[snn] by Eqsnn2;
+    end;
+    Ind3:
+      for A being Ordinal st
+        A <> 0 & A is limit_ordinal & (for B be Ordinal st B in A holds PP[B])
+        holds PP[A]
+    proof
+      let A be Ordinal such that
+      NeqA0: A <> 0 and
+      AisLimit: A is limit_ordinal and
+      limitInd: for B be Ordinal st B in A holds PP[B];
+      let nn be myNat such that
+      Eqnn: nn = A;
+      AinNAT: A in myNAT
+      proof
+        nn in myNAT by SUBSET_1:def 1;
+        hence A in myNAT by Eqnn;
+      end;
+      {} in A
+      proof
+        {} c= A by XBOOLE_1:2;
+        then 0 c= A by ORDINAL1:def 13;
+        then 0 c< A by NeqA0, XBOOLE_0:def 8;
+        then 0 in A by ORDINAL1:11;
+        hence {} in A by ORDINAL1:def 13;
+      end;
+      then myNAT c= A by AisLimit, ORDINAL1:def 11;
+      then for a be object st a in myNAT holds a in A by TARSKI:def 3;
+      then AinA: A in A by AinNAT;
+      not A in A;
+      hence thesis by AinA;
+    end;
+    thus for A be Ordinal holds PP[A] from ORDINAL2:sch 1(Ind1, Ind2, Ind3);
+  end;
+  then PP[nn];
+  hence P[n];
+end;
+

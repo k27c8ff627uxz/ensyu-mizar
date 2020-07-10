@@ -1,0 +1,306 @@
+environ
+  vocabularies TARSKI, XBOOLE_0, ZFMISC_1, SUBSET_1, RELAT_1,
+               FUNCT_1, FUNCT_2;
+  notations TARSKI, XBOOLE_0, ZFMISC_1, SUBSET_1, RELSET_1,
+            XTUPLE_0, FUNCT_1, FUNCT_2;
+  constructors TARSKI, XBOOLE_0, ZFMISC_1, SUBSET_1, RELSET_1,
+               XTUPLE_0, FUNCT_1, FUNCT_2;
+  theorems TARSKI, XBOOLE_0, XTUPLE_0, ZFMISC_1, SUBSET, SUBSET_1,
+           RELSET_1, FUNCT_1, FUNCT_2;
+  registrations XBOOLE_0, SUBSET_1, RELSET_1;
+begin
+
+reserve A, B for set;
+theorem ToNonEmpty:
+  for x be object holds
+  x in A implies
+  A is non empty
+proof
+  let x be object;
+  assume A1: x in A;
+  assume A is empty;
+  then not x in A by XBOOLE_0:def 1;
+  hence contradiction by A1;
+end;
+
+theorem NonEmptyDest:
+  A is non empty implies 
+  ex a be object st a in A
+proof
+  assume AisNE: A is non empty;
+  assume NEA: not ex a be object st a in A;
+  for x be object holds not x in A
+  proof
+    let x be object;
+    assume x in A;
+    then ex x be object st x in A;
+    hence contradiction by NEA;
+  end;
+  then A is empty by XBOOLE_0:def 1;
+  hence contradiction by AisNE;
+end;
+
+theorem
+  A \ B c= A
+proof
+  for x be object holds x in A \ B implies x in A
+  proof
+    let x be object;
+    assume x in A \ B;
+    hence x in A by XBOOLE_0:def 5;
+  end;
+  hence A \ B c= A by TARSKI:def 3;
+end;
+
+theorem AllIsRelation:
+  [:A, B:] is Relation of A, B
+proof
+  [:A, B:] c= [:A, B:];
+  then [:A, B:] in bool [:A, B:] by ZFMISC_1:def 1;
+  then [:A, B:] is Element of bool [:A, B:] by SUBSET_1:def 1;
+  hence thesis;
+end;
+
+theorem CartesianIn:
+  for a, b be object holds
+  [a, b] in [:A, B:] iff (a in A & b in B)
+proof
+  let a, b be object;
+  thus [a, b] in [:A, B:] implies (a in A & b in B)
+  proof
+    assume [a, b] in [:A, B:];
+    then ex x, y be object st
+      x in A & y in B & [a, b] = [x, y] by ZFMISC_1:def 2;
+    then consider x, y be object such that
+    In1: x in A and
+    In2: y in B and
+    Eqaby: [a, b] = [x, y];
+    EqH: a = x & b = y by Eqaby, XTUPLE_0:1;
+    thus a in A by In1, EqH;
+    thus b in B by In2, EqH;
+  end;
+  thus (a in A & b in B) implies [a, b] in [:A, B:]
+  proof
+    thus thesis by ZFMISC_1:def 2;
+  end;
+end;
+
+theorem RelationIn:
+  for a, b be object holds
+  for r be Relation of A, B holds
+  [a, b] in r implies (a in A & b in B)
+proof
+  let a, b be object;
+  let r be Relation of A, B;
+  assume Inr: [a, b] in r;
+  r is Element of bool [:A, B:];
+  then r in bool [:A, B:] by SUBSET_1:def 1;
+  then r c= [:A, B:] by ZFMISC_1:def 1;
+  then [a, b] in [:A, B:] by Inr, TARSKI:def 3;
+  hence a in A & b in B by CartesianIn;
+end;
+
+theorem ToRelation:
+  for r be set holds
+  r c= [:A, B:] iff
+  r is Relation of A, B
+proof
+  let r be set;
+  thus r c= [:A, B:] implies r is Relation of A, B
+  proof
+    assume r c= [:A, B:];
+    then r in bool [:A, B:] by ZFMISC_1:def 1;
+    then r is Element of bool [:A, B:] by SUBSET_1:def 1;
+    hence r is Relation of A, B;
+  end;
+  thus r is Relation of A, B implies r c= [:A, B:]
+  proof
+    assume r is Relation of A, B;
+    then r is Element of bool [:A, B:];
+    then r in bool [:A, B:] by SUBSET_1:def 1;
+    hence r c= [:A, B:] by ZFMISC_1:def 1;
+  end;
+end;
+
+EmptyEq :
+ A is empty & B is empty implies A = B
+proof
+  assume EA: A is empty;
+  assume EB: B is empty;
+  A1: for X, Y be set holds
+    X is empty & Y is empty implies
+    for x be object holds x in X implies x in Y
+  proof
+    let X, Y be set;
+    assume EX: X is empty;
+    assume Y is empty;
+    let x be object;
+    assume xInX: x in X;
+    not x in X by EX, XBOOLE_0:def 1;
+    hence thesis by xInX;
+  end;
+  for x be object holds x in A iff x in B
+  proof
+    let x be object;
+    thus x in A implies x in B by A1, EA, EB;
+    thus x in B implies x in A by A1, EA, EB;
+  end;
+  hence thesis by TARSKI:2;
+end;
+
+theorem Relation2Function:
+  for r be Relation of A, B holds
+  (for a be Element of A holds ex b be Element of B st [a, b] in r) &
+  (for a be Element of A holds for b1, b2 be Element of B holds
+    [a, b1] in r & [a, b2] in r implies b1 = b2)
+  implies
+  r is Function of A, B
+proof
+  let r be Relation of A, B;
+  assume H1: for a be Element of A holds ex b be Element of B st [a, b] in r;
+  assume H2:
+    for a be Element of A holds for b1, b2 be Element of B holds
+    [a, b1] in r & [a, b2] in r implies b1 = b2;
+  A1: r is quasi_total
+  proof
+    per cases;
+    suppose EB: B = {};
+      EA: A is empty
+      proof
+        assume NEA: A is non empty;
+        then ex a be object st a in A by NonEmptyDest;
+        then consider a be object such that
+        aInA: a in A;
+        a is set by TARSKI:1;
+        then reconsider sa = a as set;
+        sa is Element of A by SUBSET_1:def 1, aInA, NEA;
+        then reconsider ea = sa as Element of A;
+        ex eb be Element of B st [ea, eb] in r by H1, aInA;
+        then consider eb be Element of B such that
+        abInr: [ea, eb] in r;
+        bInB: eb in B by RelationIn, abInr;
+        not eb in B by EB, XBOOLE_0:def 1;
+        hence contradiction by bInB;
+      end;
+      Er: r is empty
+      proof
+        for p be object holds not p in r
+        proof
+          let p be object;
+          assume p in r;
+          then ex a, b be object st
+            p = [a, b] & a in A & b in B by RELSET_1:2;
+          then consider a, b be object such that
+          aInA: a in A;
+          A is non empty by ToNonEmpty, aInA;
+          hence contradiction by EA;
+        end;
+        hence r is empty by XBOOLE_0:def 1;
+      end;
+      then r = {} by EmptyEq;
+      hence r is quasi_total by FUNCT_2:def 1, EB;
+    end;
+    suppose NEB: not B = {};
+      SubdA: dom r c= A
+      proof
+        dom r is Subset of A;
+        hence dom r c= A by SUBSET:3;
+      end;
+      for a be object st a in A holds a in dom r
+      proof
+        let a be object;
+        assume aInA: a in A;
+        ex b be object st [a, b] in r
+        proof
+          a is set by TARSKI:1;
+          then reconsider sa = a as set;
+          saInA: sa in A by aInA;
+          then NEA: A is non empty by ToNonEmpty;
+          then sa is Element of A by SUBSET_1:def 1, saInA;
+          then reconsider ea = sa as Element of A;
+          ex eb be Element of B st [ea, eb] in r by H1;
+          then consider eb be Element of B such that
+          Inab: [ea, eb] in r;
+          take eb;
+          thus [a, eb] in r by Inab;
+        end;
+        hence a in dom r by XTUPLE_0:def 12;
+      end;
+      then A c= dom r by TARSKI:def 3;
+      then A = dom r by XBOOLE_0:def 10, SubdA;
+      hence r is quasi_total by NEB, FUNCT_2:def 1;
+    end;
+  end;
+  A2: r is Function-like
+  proof
+    for x, y1, y2 be object st
+      [x, y1] in r & [x, y2] in r holds y1 = y2
+    proof
+      let x, y1, y2 be object such that
+      Inr1: [x, y1] in r and
+      Inr2: [x, y2] in r;
+      reconsider sx = x as set by TARSKI:1;
+      reconsider sy1 = y1 as set by TARSKI:1;
+      reconsider sy2 = y2 as set by TARSKI:1;
+      xInA: sx in A by RelationIn, Inr1;
+      y1InB: sy1 in B by RelationIn, Inr1;
+      y2InB: sy2 in B by RelationIn, Inr2;
+      NEA: A is non empty by ToNonEmpty, xInA;
+      NEB: B is non empty by ToNonEmpty, y1InB;
+      sx is Element of A by SUBSET_1:def 1, xInA, NEA;
+      then reconsider exx = sx as Element of A;
+      sy1 is Element of B by SUBSET_1:def 1, y1InB, NEB;
+      then reconsider ey1 = sy1 as Element of B;
+      sy2 is Element of B by SUBSET_1:def 1, y2InB, NEB;
+      then reconsider ey2 = sy2 as Element of B;
+      [exx, ey1] in r & [exx, ey2] in r by Inr1, Inr2;
+      then ey1 = ey2 by H2;
+      hence y1 = y2;
+    end;
+    hence thesis by FUNCT_1:def 1;
+  end;
+  thus r is Function of A, B by A1, A2;
+end;
+
+theorem FuncIn:
+  for X, Y be non empty set holds
+  for f be Function of X, Y holds
+  for x be Element of X holds
+  [x, f. x] in f
+proof
+  let X, Y be non empty set;
+  let f be Function of X, Y;
+  let x be Element of X;
+  not Y = {};
+  then EqX: X = dom f by FUNCT_2:def 1;
+  x in X by SUBSET_1:def 1;
+  then x in dom f by EqX;
+  hence thesis by FUNCT_1:def 2;
+end;
+
+theorem
+  for X, Y be non empty set holds
+  for f be Function of X, Y holds
+  for x be Element of X holds
+  for y be Element of Y holds
+  f. x = y iff [x, y] in f
+proof
+  let X, Y be non empty set;
+  let f be Function of X, Y;
+  let x be Element of X;
+  let y be Element of Y;
+  thus f. x = y implies [x, y] in f
+  proof
+    assume f. x = y;
+    hence [x, y] in f by FuncIn;
+  end;
+  thus [x, y] in f implies f. x = y
+  proof
+    assume In1: [x, y] in f;
+    In2: [x, f. x] in f by FuncIn;
+    f is Function-like;
+    hence f. x = y by FUNCT_1:def 1, In1, In2;
+  end;
+end;
+
+

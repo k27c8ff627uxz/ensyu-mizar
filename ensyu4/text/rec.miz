@@ -1,0 +1,441 @@
+environ
+  vocabularies TARSKI, XBOOLE_0, SUBSET_1, ZFMISC_1, SETFAM_1,
+               RELAT_1, FUNCT_1, ENSYU4, REC4;
+  notations TARSKI, XBOOLE_0, SUBSET_1, ZFMISC_1, SETFAM_1,
+            RELSET_1, FUNCT_2, PEANO;
+  constructors TARSKI, XBOOLE_0, SUBSET_1, ZFMISC_1, SETFAM_1,
+               RELSET_1, FUNCT_2, PEANO;
+  theorems TARSKI, XBOOLE_0, XBOOLE_1, SUBSET_1, RELSET_1, XTUPLE_0,
+           ZFMISC_1, SETFAM_1, UTILS, PEANO;
+  schemes PEANO;
+  registrations XBOOLE_0, PEANO;
+begin
+
+reserve A for non empty set;
+reserve a for Element of A;
+reserve f for Function of A, A;
+
+
+definition
+  let A be non empty set;
+  let a be Element of A;
+  let f be Function of A, A;
+  func rec-likes(a, f) -> set equals :reclikes:
+    { r where r is Relation of myNAT, A :
+      [N0, a] in r &
+      (for n be myNat holds for x be Element of A holds
+         [n, x] in r implies [NSucc n, f. x] in r)};
+  coherence;
+end;
+
+recLikesDest:
+  for r be set st r in rec-likes(a, f) holds
+  r is Relation of myNAT, A &
+  [N0, a] in r &
+  (for n be myNat holds for x be Element of A holds
+    [n, x] in r implies [NSucc n, f. x] in r)
+proof
+  let r be set;
+  assume r in rec-likes(a, f);
+  then consider rr be Relation of myNAT, A such that
+  Eqrr: r = rr and
+  Cond0: [N0, a] in rr and
+  Cond1: (for n be myNat holds for x be Element of A holds
+         [n, x] in rr implies [NSucc n, f. x] in rr);
+  thus r is Relation of myNAT, A by Eqrr;
+  thus [N0, a] in r by Cond0, Eqrr;
+  thus thesis by Cond1, Eqrr;
+end;
+
+recLikesConst:
+  for r be set holds
+  (
+    r is Relation of myNAT, A &
+    [N0, a] in r &
+    (for n be myNat holds for x be Element of A holds
+      [n, x] in r implies [NSucc n, f. x] in r)
+  ) implies r in rec-likes(a, f)
+proof
+  thus thesis;
+end;
+
+allInRecLikes:
+  [:myNAT, A:] in rec-likes(a, f)
+proof
+  A1: [:myNAT, A:] is Relation of myNAT, A by UTILS:4;
+  A2: [N0, a] in [:myNAT, A:]
+  proof
+    N0 in myNAT & a in A by SUBSET_1:def 1;
+    hence thesis by UTILS:5;
+  end;
+  A3: for n be myNat holds for x be Element of A holds
+        [n, x] in [:myNAT, A:] implies [NSucc n, f. x] in [:myNAT, A:]
+  proof
+    let n be myNat;
+    let x be Element of A;
+    NSucc n in myNAT & f. x in A by SUBSET_1:def 1;
+    hence thesis by UTILS:5;
+  end;
+  thus thesis by recLikesConst, A1, A2, A3;
+end;
+
+recLikesIsNonEmpty:
+  rec-likes(a, f) is non empty
+proof
+  thus thesis by allInRecLikes, UTILS:1;
+end;
+
+definition
+  let A be non empty set;
+  let a be Element of A;
+  let f be Function of A, A;
+  func rec-func(a, f) -> Relation of myNAT, A equals meet rec-likes(a, f);
+  coherence
+  proof
+    [:myNAT, A:] in rec-likes(a, f) by allInRecLikes;
+    then meet rec-likes(a, f) c= [:myNAT, A:] by SETFAM_1:3;
+    hence meet rec-likes(a, f) is Relation of myNAT, A by UTILS:7;
+  end;
+end;
+
+recFuncInRecLikes:
+  rec-func(a, f) in rec-likes(a, f)
+proof
+  NE: rec-likes(a, f) <> {} by recLikesIsNonEmpty;
+  A1: [N0, a] in rec-func(a, f)
+  proof
+    for Y be set st Y in rec-likes(a, f) holds [N0, a] in Y
+    proof
+      let Y be set;
+      assume Y in rec-likes(a, f);
+      hence [N0, a] in Y by recLikesDest;
+    end;
+    then [N0, a] in meet rec-likes(a, f) by SETFAM_1:def 1, NE;
+    hence [N0, a] in rec-func(a, f);
+  end;
+  A2: for n be myNat holds for x be Element of A holds
+        [n, x] in rec-func(a, f) implies [NSucc n, f. x] in rec-func(a, f)
+  proof
+    let n be myNat;
+    let x be Element of A;
+    assume [n, x] in rec-func(a, f);
+    then [n, x] in meet rec-likes(a, f);
+    then PreIn: for Y be set st Y in rec-likes(a, f) holds [n, x] in Y
+      by SETFAM_1:def 1, NE;
+    for Y be set st Y in rec-likes(a, f) holds [NSucc n, f. x] in Y
+    proof
+      let Y be set;
+      assume YIn: Y in rec-likes(a, f);
+      then RecNext: for n be myNat holds for x be Element of A holds
+        [n, x] in Y implies [NSucc n, f. x] in Y by recLikesDest;
+      InPreIn: [n, x] in Y by PreIn, YIn;
+      hence [NSucc n, f. x] in Y by RecNext;
+    end;
+    then [NSucc n, f. x] in meet rec-likes(a, f) by SETFAM_1:def 1, NE;
+    hence [NSucc n, f. x] in rec-func(a, f);
+  end;
+  thus thesis by recLikesConst, A1, A2;
+end;
+
+recFuncIsMinimum:
+  for r be set st r in rec-likes(a, f) holds
+    rec-func(a, f) c= r
+proof
+  let r be set;
+  assume r in rec-likes(a, f);
+  then meet rec-likes(a, f) c= r by SETFAM_1:3;
+  hence rec-func(a, f) c= r;
+end;
+
+recFuncIn0:
+  [N0, a] in rec-func(a, f)
+proof
+  rec-func(a, f) in rec-likes(a, f) by recFuncInRecLikes;
+  hence [N0, a] in rec-func(a, f) by recLikesDest;
+end;
+
+recFuncInS:
+  for i be Element of A holds
+  for n be myNat holds
+  [n, i] in rec-func(a, f) implies [NSucc n, f. i] in rec-func(a, f)
+proof
+  rec-func(a, f) in rec-likes(a, f) by recFuncInRecLikes;
+  hence thesis by recLikesDest;
+end;
+
+recFuncIsQuasiTotal:
+  for n be myNat holds
+  ex y be Element of A st
+  [n, y] in rec-func(a, f)
+proof
+  defpred P[myNat] means ex y be Element of A st [$1, y] in rec-func(a, f);
+  Ind1: P[N0]
+  proof
+    take a;
+    rec-func(a, f) in rec-likes(a, f) by recFuncInRecLikes;
+    hence [N0, a] in rec-func(a, f) by recLikesDest;
+  end;
+  Ind2: for n be myNat holds P[n] implies P[NSucc n]
+  proof
+    let n be myNat;
+    given y be Element of A such that
+      Inny: [n, y] in rec-func(a, f);
+    take f. y;
+    rec-func(a, f) in rec-likes(a, f) by recFuncInRecLikes;
+    then for n be myNat holds for x be Element of A holds
+      [n, x] in rec-func(a, f) implies [NSucc n, f. x] in rec-func(a, f)
+      by recLikesDest;
+    hence [NSucc n, f. y] in rec-func(a, f) by Inny;
+  end;
+  thus for n be myNat holds P[n] from PEANO:sch 1(Ind1, Ind2);
+end;
+
+recFuncIsFunctionLike0:
+  for a1, a2 be Element of A holds
+  [N0, a1] in rec-func(a, f) & [N0, a2] in rec-func(a, f) implies
+  a1 = a2
+proof
+  deffunc F() = {[N0, a]} \/ [:myNAT \ {N0}, A:];
+  N0Lem: for x be Element of A holds [N0, x] in F() implies x = a
+  proof
+    let x be Element of A;
+    assume [N0, x] in F();
+    then InH: [N0, x] in {[N0, a]} or [N0, x] in [:myNAT \ {N0}, A:]
+      by XBOOLE_0:def 3;
+    not [N0, x] in [:myNAT \ {N0}, A:]
+    proof
+      assume [N0, x] in [:myNAT \ {N0}, A:];
+      then N0 in myNAT \ {N0} by UTILS:5;
+      then not N0 in {N0} by XBOOLE_0:def 5;
+      then not N0 = N0 by TARSKI:def 1;
+      hence contradiction;
+    end;
+    then [N0, x] in {[N0, a]} by InH;
+    then [N0, x] = [N0, a] by TARSKI:def 1;
+    then N0 = N0 & x = a by XTUPLE_0:1;
+    hence x = a;
+  end;
+  F() in rec-likes(a, f)
+  proof
+    A1: F() is Relation of myNAT, A
+    proof
+      for p be object st p in F() holds p in [:myNAT, A:]
+      proof
+        let p be object such that pIn: p in F();
+        p in {[N0, a]} or p in [:myNAT \ {N0}, A:] by XBOOLE_0:def 3, pIn;
+        then per cases;
+        suppose Inp: p in {[N0, a]};
+          Eqp: p = [N0, a] by TARSKI:def 1, Inp;
+          N0 in myNAT & a in A by SUBSET_1:def 1;
+          then [N0, a] in [:myNAT, A:] by UTILS:5;
+          hence p in [:myNAT, A:] by Eqp;
+        end;
+        suppose Inp: p in [:myNAT \ {N0}, A:];
+          [:myNAT \ {N0}, A:] c= [:myNAT, A:]
+          proof
+            myNAT \ {N0} c= myNAT & A c= A by UTILS:3;
+            hence thesis by ZFMISC_1:96;  
+          end;
+          then
+            for p be object st p in [:myNAT \ {N0}, A:] holds p in [:myNAT, A:]
+            by TARSKI:def 3;
+          hence p in [:myNAT, A:] by Inp;
+        end;
+      end;
+      then F() c= [:myNAT, A:] by TARSKI:def 3;
+      hence thesis by UTILS:7;
+    end;
+    A2: [N0, a] in F()
+    proof
+      [N0, a] in {[N0, a]} by TARSKI:def 1;
+      hence [N0, a] in F() by XBOOLE_0:def 3;
+    end;
+    A3: for n be myNat holds for x be Element of A holds
+      [n, x] in F() implies [NSucc n, f. x] in F()
+    proof
+      let n be myNat;
+      let x be Element of A;
+      assume [n, x] in F();
+      NSucc n in myNAT \ {N0}
+      proof
+        not NSucc n in {N0}
+        proof
+          assume NSucc n in {N0};
+          then NSucc n = N0 by TARSKI:def 1;
+          hence contradiction by PEANO:1;
+        end;
+        then NSucc n in myNAT & not NSucc n in {N0} by SUBSET_1:def 1;
+        hence NSucc n in myNAT \ {N0} by XBOOLE_0:def 5;
+      end;
+      then NSucc n in myNAT \ {N0} & f. x in A by SUBSET_1:def 1;
+      then [NSucc n, f. x] in [:myNAT \ {N0}, A:] by UTILS:5;
+      hence [NSucc n, f. x] in F() by XBOOLE_0:def 3;
+    end;
+    thus thesis by recLikesConst, A1, A2, A3;
+  end;
+  then rec-func(a, f) c= F() by recFuncIsMinimum;
+  then SubH1: for n be myNat holds for x be Element of A holds
+    [n, x] in rec-func(a, f) implies [n, x] in F() by RELSET_1:def 1;
+  let a1, a2 be Element of A;
+  assume Ina1R: [N0, a1] in rec-func(a, f);
+  assume Ina2R: [N0, a2] in rec-func(a, f);
+  [N0, a1] in F() by SubH1, Ina1R;
+  then Eqxa1: a1 = a by N0Lem;
+  [N0, a2] in F() by SubH1, Ina2R;
+  then Eqxa2: a2 = a by N0Lem;
+  thus a1 = a2 by Eqxa1, Eqxa2;
+end;
+
+recFuncIsFunctionLikeS:
+  for n be myNat holds (
+    for a1, a2 be Element of A holds
+    [n, a1] in rec-func(a, f) & [n, a2] in rec-func(a, f) implies
+    a1 = a2
+  ) implies (
+    for a1, a2 be Element of A holds
+    [NSucc n, a1] in rec-func(a, f) & [NSucc n, a2] in rec-func(a, f) implies
+    a1 = a2
+  )  
+proof
+  let n be myNat;
+  assume IndH: for a1, a2 be Element of A holds
+    [n, a1] in rec-func(a, f) & [n, a2] in rec-func(a, f) implies
+    a1 = a2;
+  let a1, a2 be Element of A;
+  assume Ina1: [NSucc n, a1] in rec-func(a, f);
+  assume Ina2: [NSucc n, a2] in rec-func(a, f);
+  assume Neq: not a1 = a2;
+  ex x be Element of A st [n, x] in rec-func(a, f) by recFuncIsQuasiTotal;
+  then consider x be Element of A such that
+  nxIn: [n, x] in rec-func(a, f);
+  ex a3 be Element of A st not a3 = f. x & [NSucc n, a3] in rec-func(a, f)
+  proof
+    [NSucc n, f. x] in rec-func(a, f) by recFuncInS, nxIn;
+    per cases;
+    suppose Eqfxa: a1 = f. x;
+      take a2;
+      thus not a2 = f. x by Neq, Eqfxa;
+      thus [NSucc n, a2] in rec-func(a, f) by Ina2;
+    end;
+    suppose NEqfxa: not a1 = f. x;
+      take a1;
+      thus not a1 = f. x by NEqfxa;
+      thus [NSucc n, a1] in rec-func(a, f) by Ina1;
+    end;
+  end;
+  then consider a3 be Element of A such that
+  Neqa3: not a3 = f. x and
+  Nna3In: [NSucc n, a3] in rec-func(a, f);
+  deffunc F() = rec-func(a, f) \ {[NSucc n, a3]};
+  F() in rec-likes(a, f)
+  proof
+    H1: F() is Relation of myNAT, A
+    proof
+      SubH1: F() c= rec-func(a, f) by UTILS:3;
+      SubH2: rec-func(a, f) c= [:myNAT, A:] by UTILS:7;
+      F() c= [:myNAT, A:] by XBOOLE_1:1, SubH1, SubH2;
+      hence F() is Relation of myNAT, A by UTILS:7;      
+    end;
+    H2: [N0, a] in F()
+    proof
+      InH1: [N0, a] in rec-func(a, f) by recFuncIn0;
+      InH2: not [N0, a] in {[NSucc n, a3]}
+      proof
+        assume [N0, a] in {[NSucc n, a3]};
+        then [N0, a] = [NSucc n, a3] by TARSKI:def 1;
+        then N0 = NSucc n by XTUPLE_0:1;
+        hence contradiction by PEANO:1;
+      end;
+      thus [N0, a] in F() by XBOOLE_0:def 5, InH1, InH2;
+    end;
+    H3: for n be myNat holds for x be Element of A holds
+       [n, x] in F() implies [NSucc n, f. x] in F()
+    proof
+      let i be myNat;
+      let y be Element of A;
+      assume [i, y] in F();
+      then iyIn: [i, y] in rec-func(a, f) by XBOOLE_0:def 5;
+      then NifIn: [NSucc i, f. y] in rec-func(a, f) by recFuncInS;
+      not [NSucc i, f. y] = [NSucc n, a3]
+      proof
+        assume [NSucc i, f. y] = [NSucc n, a3];
+        then EqiAEqa3: NSucc i = NSucc n & f. y = a3 by XTUPLE_0:1;
+        then i = n by PEANO:2;
+        then [n, y] in rec-func(a, f) by iyIn;
+        then x = y by IndH, nxIn;
+        then f. x = a3 by EqiAEqa3;
+        hence contradiction by Neqa3;
+      end;
+      then not [NSucc i, f. y] in {[NSucc n, a3]} by TARSKI:def 1;
+      hence [NSucc i, f. y] in F() by XBOOLE_0:def 5, NifIn;
+    end;
+    thus F() in rec-likes(a, f) by recLikesConst, H1, H2, H3;
+  end;
+  then rec-func(a, f) c= F() by recFuncIsMinimum;
+  then for p be object st p in rec-func(a, f) holds p in F()
+    by TARSKI:def 3; 
+  then [NSucc n, a3] in F() by Nna3In;
+  then not [NSucc n, a3] in {[NSucc n, a3]} by XBOOLE_0:def 5;
+  then not [NSucc n, a3] = [NSucc n, a3] by TARSKI:def 1;
+  hence contradiction;
+end;
+
+recFuncIsFunctionLike:
+  for n be myNat holds
+  for a1, a2 be Element of A holds
+  [n, a1] in rec-func(a, f) & [n, a2] in rec-func(a, f) implies
+  a1 = a2
+proof
+  defpred P[myNat] means
+    for a1, a2 be Element of A holds
+    [$1, a1] in rec-func(a, f) & [$1, a2] in rec-func(a, f) implies
+    a1 = a2;
+  Ind1: P[N0] by recFuncIsFunctionLike0;
+  Ind2: for n be myNat holds P[n] implies P[NSucc n] by recFuncIsFunctionLikeS;
+  thus for n be myNat holds P[n] from PEANO:sch 1(Ind1, Ind2);
+end;
+
+definition
+  let A be non empty set;
+  let a be Element of A;
+  let f be Function of A, A;
+  redefine func rec-func(a, f) -> Function of myNAT, A;
+  coherence
+  proof
+    A1: for n be myNat holds ex a0 be Element of A st
+      [n, a0] in rec-func(a, f) by recFuncIsQuasiTotal;
+    A2: for n be myNat holds for a1, a2 be Element of A holds
+      [n, a1] in rec-func(a, f) & [n, a2] in rec-func(a, f) implies a1 = a2
+      by recFuncIsFunctionLike;
+    thus rec-func(a, f) is Function of myNAT, A by UTILS:8, A1, A2;
+  end;
+end;
+
+theorem
+  for A be non empty set holds
+  for a be Element of A holds
+  for f be Function of A, A holds
+  rec-func(a, f). N0 = a
+proof
+  let A be non empty set;
+  let a be Element of A;
+  let f be Function of A, A;
+  [N0, a] in rec-func(a, f) by recFuncIn0;
+  hence thesis by UTILS:10;
+end;
+
+theorem
+  for A be non empty set holds
+  for a be Element of A holds
+  for f be Function of A, A holds
+  for n be myNat holds
+  rec-func(a, f). (NSucc n)  = f. (rec-func(a, f). n)
+proof
+  let A be non empty set;
+  let a be Element of A;
+  let f be Function of A, A;
+  let n be myNat;
+  [n, rec-func(a, f). n] in rec-func(a, f) by UTILS:9;
+  then [NSucc n, f. (rec-func(a, f). n)] in rec-func(a, f) by recFuncInS;
+  hence rec-func(a, f). (NSucc n) = f. (rec-func(a, f). n) by UTILS:10;
+end;
